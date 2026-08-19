@@ -1,0 +1,9 @@
+.venv/
+
+model/
+*.pyc
+calibration/*.png
+out/
+MJMODEL.TXT
+MJDATA.TXT
+out/

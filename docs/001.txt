@@ -1,0 +1,256 @@
+灵龙2.0 仿真环境“零基础”速通指南
+
+目标：跳过复杂算法，15分钟内让机器人在仿真里动起来。
+
+适用对象：软件工程师，熟悉Python，不熟悉机器人仿真。
+
+核心逻辑：你的代码 → 修改数值 → MuJoCo渲染
+
+第一部分：环境搭建（Windows 原生）
+
+我们暂时避开 Linux 和 Docker 的复杂度，直接在 Windows 下跑通渲染链路。
+
+1. 安装 Python
+
+确保安装了 Python 3.9+。
+
+在命令行 (cmd) 输入检查：
+
+bash
+python --version
+2. 创建虚拟环境（必须）
+
+为了避免库版本冲突，请务必新建一个环境。
+
+bash
+# 创建名为 loong_env 的虚拟环境
+python -m venv loong_env
+
+# 激活环境
+.\loong_env\Scripts\activate
+
+激活成功后，命令行前面会出现 (loong_env) 字样。
+
+3. 安装核心依赖
+
+只安装两个库：mujoco (物理引擎) 和 numpy (数据处理)。
+
+bash
+pip install mujoco numpy
+
+注：新版 MuJoCo 无需安装老的 mujoco-py，也无需许可证密钥，极其友好。
+
+第二部分：文件准备
+
+解压模型
+
+将官方下载的 LingLong2.0_20260616.zip 解压到一个简单的目录，例如：
+
+`C:\LoongRobot`
+
+确认主文件
+
+进入文件夹，找到模型文件。通常是 .xml (MJCF格式) 或 .urdf 格式。
+
+如果是 .urdf：MuJoCo 可以直接读取。
+
+如果是 .xml：这是 MuJoCo 原生格式，兼容性最好。
+
+记下这个文件的完整路径，下文假设为：
+
+C:\LoongRobot\linglong.xml
+
+第三部分：编写“遥控器”代码
+
+在 C:\LoongRobot\` 目录下，新建demo.py`。
+
+步骤 1：侦察关节名称（必做）
+
+为什么要做这一步？
+
+机器人不像代码变量一样自动识别 left_arm，我们必须先知道它的关节在代码里叫什么名字（ID）。
+
+将以下代码复制到 demo.py 并运行：
+
+python
+# === 脚本 1：查看关节清单 ===
+import mujoco
+
+# 加载模型
+model_path = r"C:\LoongRobot\linglong.xml"
+model = mujoco.MjModel.from_xml_path(model_path)
+
+print("="*50)
+print("机器人关节清单 (请截图保存这份清单):")
+print("="*50)
+for i in range(model.njnt):
+    # 获取关节名称
+    name = model.joint(i).name
+    # 获取关节类型 (旋转关节hinge/滑动关节slide)
+    type_id = model.jnt_type[i]
+    type_str = ["自由关节", "滑动", "旋转"][type_id] if type_id < 3 else "未知"
+    print(f"ID: {i:02d} | 名称: {name:30s} | 类型: {type_str}")
+print("="*50)
+
+运行：
+
+bash
+python demo.py
+
+输出效果示例：
+
+你会看到类似下面的列表（具体名字以你的输出为准）：
+
+纯文本
+==================================================
+机器人关节清单 (请截图保存这份清单):
+==================================================
+ID: 00 | 名称: waist_yaw                      | 类型: 旋转
+ID: 01 | 名称: waist_pitch                    | 类型: 旋转
+ID: 02 | 名称: waist_roll                     | 类型: 旋转
+ID: 03 | 名称: left_shoulder_pitch            | 类型: 旋转
+ID: 04 | 名称: left_shoulder_roll             | 类型: 旋转
+ID: 05 | 名称: left_elbow_flex                | 类型: 旋转
+...
+ID: 20 | 名称: right_shoulder_pitch           | 类型: 旋转
+ID: 21 | 名称: right_shoulder_roll            | 类型: 旋转
+ID: 22 | 名称: right_elbow_flex               | 类型: 旋转
+...
+==================================================
+
+记下 right_shoulder_pitch 或类似的名字，下一步要用。
+
+步骤 2：让机器人动起来
+
+修改 demo.py，替换为以下代码。
+
+注意：请根据上一步打印出的真实名字，修改下面代码中的 'right_shoulder_pitch' 和 'right_elbow_flex'。
+
+python
+# === 脚本 2：驱动机器人 ===
+import mujoco
+import mujoco.viewer
+import time
+import numpy as np
+
+# 1. 加载模型
+model_path = r"C:\LoongRobot\linglong.xml"
+model = mujoco.MjModel.from_xml_path(model_path)
+data = mujoco.MjData(model)
+
+# 2. 启动可视化窗口
+with mujoco.viewer.launch_passive(model, data) as viewer:
+    print("仿真启动！关闭窗口或按 Ctrl+C 退出。")
+    
+    # 初始化：让机器人站稳
+    mujoco.mj_resetData(model, data)
+    
+    # 获取关节ID（如果名字不对，这里会报错，请核对清单）
+    try:
+        # 修改为你的清单里的实际名字！
+        shoulder_id = model.joint('right_shoulder_pitch').qposadr[0]
+        elbow_id = model.joint('right_elbow_flex').qposadr[0]
+        
+        print(f"找到右肩关节 ID: {shoulder_id}")
+        print(f"找到右肘关节 ID: {elbow_id}")
+    except KeyError as e:
+        print(f"错误：未找到关节 {e}")
+        print("请检查脚本1打印的清单，修改代码中的关节名称。")
+        exit()
+
+    # 3. 主循环
+    while viewer.is_running():
+        # --- 核心控制区 ---
+        # qpos 数组存储了所有关节的角度（单位：弧度）
+        # 1弧度 ≈ 57.3度
+        
+        # 控制右肩：让它在 -0.5 到 0.5 弧度之间来回摆动
+        data.qpos[shoulder_id] = 0.4 * np.sin(time.time() * 2)  # 乘以2是加快速度
+        
+        # 控制右肘：弯曲到 1.0 弧度（约57度）
+        data.qpos[elbow_id] = 1.0
+        
+        # --- 物理更新 ---
+        # forward 计算位置，step 计算动力学（如果不step，物体不会受重力掉落）
+        mujoco.mj_forward(model, data)
+        
+        # 刷新画面
+        viewer.sync()
+        
+        # 控制帧率
+        time.sleep(0.01)
+第四部分：预期效果与原理解析
+1. 运行效果
+
+在命令行运行：
+
+bash
+python demo.py
+
+你将看到：
+
+弹出一个黑色窗口。
+
+窗口中出现灵龙机器人的 3D 模型（初期可能是灰白色，由方块和圆柱组成，这是正常的碰撞体模型）。
+
+机器人的右臂会持续抬起、放下，且肘关节保持弯曲状态。
+
+2. 原理解析（人话版）
+
+model (模型)：相当于机器人的“设计图纸”。它只读，定义了骨头多长、关节在哪、能转多少度。
+
+data (数据)：相当于机器人的“当前状态”。它可读写，记录了此刻每一个关节转了多少度、身体加速度是多少。
+
+qpos (广义坐标)：这是你比赛的最终输出接口。
+
+如果你以前做嵌入式，把它想象成 PWM 占空比​ 或者 舵机角度寄存器。
+
+在比赛中，无论你用 MediaPipe 还是深度学习，最终都要算出这一串数字。
+
+viewer (渲染器)：把 data 里的数字变成屏幕上的动画。
+
+3. 角度单位：弧度制
+
+机器人不用“度”，用“弧度”。
+
+π (3.14) = 180°
+
+π/2 (1.57) = 90°
+
+如果你设 data.qpos[id] = 3.14，关节会转到倒立状态。
+
+第五部分：故障排查
+
+窗口一闪而过
+
+检查 XML/URDF 文件路径是否正确。
+
+检查终端是否有红色报错信息。
+
+机器人没反应（不动）
+
+检查 KeyError：说明关节名字写错了，回去对照清单改。
+
+检查是否调用了 mj_forward 或 mj_step。
+
+机器人散架/乱飞
+
+这是物理引擎计算发散了。通常是因为关节角度超出了 URDF 里定义的限位 (limits)。
+
+解决办法：给角度加个限制，比如 angle = max(-1.0, min(1.0, raw_angle))。
+
+下一步行动建议
+
+现在你已经有了输入（代码改变角度）和输出（屏幕上的机器人动作）。
+
+接下来的开发流程变成了：
+
+写代码读取 MediaPipe​ 的 2D 关键点。
+
+猜出这些关键点的 3D 坐标（最简单的办法：假设人高1.7m，按比例换算 Z 轴深度）。
+
+使用 IK 库（如 ikpy）计算出：为了让“手”到达那个 3D 坐标，肩膀和肘部应该转多少度。
+
+把第 3 步算出的角度填入 data.qpos[ID]。
+
+需要我接着帮你把 MediaPipe -> 简易 3D 坐标 -> IK 求解​ 这一段的代码串起来吗？

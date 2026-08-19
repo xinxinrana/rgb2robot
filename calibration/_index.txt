@@ -1,0 +1,88 @@
+# 校准图集索引(按文件名前缀顺序看)
+
+A0_default.png
+  问题: A0 [基线]: 用 model.qpos0 当家底,其它关节不动 —— 机器人在画面里是什么姿势?
+     站着 / 跪着 / 躺平 / T-pose / 双臂下垂 / 双臂举起 ... 越细越好。
+  文件: calibration\A0_default.png
+
+B1_head_yaw_pos.png
+  问题: B1 [头偏航 +1.0]: 头朝哪边转?我眼里机器人的左/右,还是你眼里(面对机器人)的左/右?
+  文件: calibration\B1_head_yaw_pos.png
+
+B2_head_yaw_neg.png
+  问题: B2 [头偏航 -1.0]: 头朝哪边转?(和 B1 比一下)
+  文件: calibration\B2_head_yaw_neg.png
+
+B3_head_pitch_pos.png
+  问题: B3 [头俯仰 +0.5]: 头抬起(仰)还是低下(俯)?
+  文件: calibration\B3_head_pitch_pos.png
+
+B4_head_pitch_neg.png
+  问题: B4 [头俯仰 -0.5]: 头抬起(仰)还是低下(俯)?
+  文件: calibration\B4_head_pitch_neg.png
+
+B5_waist_yaw_pos.png
+  问题: B5 [腰偏航 +1.0]: 整个身体(从腰开始)朝哪边转?
+  文件: calibration\B5_waist_yaw_pos.png
+
+B6_waist_yaw_neg.png
+  问题: B6 [腰偏航 -1.0]: 整个身体朝哪边转?(和 B5 比)
+  文件: calibration\B6_waist_yaw_neg.png
+
+B7_waist_pitch_pos.png
+  问题: B7 [腰俯仰 +0.4]: 身体前弯(鞠躬)还是后仰(挺胸)?
+  文件: calibration\B7_waist_pitch_pos.png
+
+B8_waist_pitch_neg.png
+  问题: B8 [腰俯仰 -0.4]: 身体前弯还是后仰?(和 B7 比)
+  文件: calibration\B8_waist_pitch_neg.png
+
+B9_L_shoulder_pitch_pos.png
+  问题: B9 [左肩俯仰 +1.0]: 左臂往哪个方向?前/后/上/侧?
+  文件: calibration\B9_L_shoulder_pitch_pos.png
+
+B10_L_shoulder_pitch_neg.png
+  问题: B10 [左肩俯仰 -1.0]: 左臂往哪个方向?(和 B9 比)
+  文件: calibration\B10_L_shoulder_pitch_neg.png
+
+B11_L_shoulder_roll_pos.png
+  问题: B11 [左肩翻滚 +2.0]: 左臂往哪个方向?是不是从身侧抬到高处?
+  文件: calibration\B11_L_shoulder_roll_pos.png
+
+B12_L_shoulder_roll_neg.png
+  问题: B12 [左肩翻滚 -0.05(接近下限)]: 左臂往哪个方向?是不是贴着身侧 / 略前伸?
+  文件: calibration\B12_L_shoulder_roll_neg.png
+
+B13_L_elbow_pos.png
+  问题: B13 [左肘 +1.0]: 左手肘怎么变?弯曲 / 反向 / 不动?
+  文件: calibration\B13_L_elbow_pos.png
+
+B14_L_knee_pos.png
+  问题: B14 [左膝 +1.0]: 左腿怎么变?弯曲(下蹲)还是反向(后抬)?
+  文件: calibration\B14_L_knee_pos.png
+
+C1_T_pose.png
+  问题: C1 [T-pose 试猜]: 左肩 roll=+1.57, 右肩 roll=-1.57, 其它不动 —— 双臂是不是展开成 'T' 字?
+     如果不是,实际看到的是啥?哪个臂抬高了?哪个还垂着?
+  文件: calibration\C1_T_pose.png
+
+D1_arms_up.png
+  问题: D1 [我的 '举高' 猜测]: 双肩 pitch=-1.57, 双肩 roll=±0.78 —— 双手是不是举到头上了?
+     如果不是,实际看到的是啥?手在身体哪个方位?
+  文件: calibration\D1_arms_up.png
+
+D2_bow.png
+  问题: D2 [我的 '鞠躬' 猜测]: 腰 pitch=+0.5, 头 pitch=+0.3 —— 是不是弯腰低头?
+  文件: calibration\D2_bow.png
+
+D3_sway_left.png
+  问题: D3 [我的 '摆胯左' 猜测]: 腰 yaw=-0.3 —— 是不是上身 / 头转向机器人左肩那边?
+  文件: calibration\D3_sway_left.png
+
+D4_hip_yaw_demo.png
+  问题: D4 [顺带验证]: 把 qpos[2](其实是 left_hip_yaw)=0.3 —— 左大腿是不是横着转?这相当于 panel.py 以前 'base_z=0.3' 实际产生的效果。
+  文件: calibration\D4_hip_yaw_demo.png
+
+D5_push_palm.png
+  问题: D5 [我的 '推掌' 猜测]: 右肩 pitch=-1.0, 右肩 roll=-0.5, 肘=0 —— 右臂是不是前伸?掌心是不是朝前?
+  文件: calibration\D5_push_palm.png
