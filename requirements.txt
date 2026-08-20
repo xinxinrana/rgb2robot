@@ -1,0 +1,6 @@
+numpy
+opencv-python
+mediapipe
+mujoco
+PyQt5
+Pillow
